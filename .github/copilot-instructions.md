@@ -36,6 +36,7 @@ Este es un proyecto de hackathón de Mercadona desarrollado con Next.js, React y
 -   Tipos TypeScript explícitos
 -   Props interfaces bien definidas
 -   Usa siempre que puedas componentes shadcn. Si no existen en el directorio, pero shadcn cuenta con el mismo, propón su comando de instalación
+-   Usa siempre los componentes Image y Link de next, antes que los por defecto de html
 
 ## Objetivos del Proyecto
 

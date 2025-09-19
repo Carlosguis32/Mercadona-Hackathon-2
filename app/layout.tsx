@@ -1,27 +1,36 @@
+import Footer from "@/components/footer";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Metadata } from "next";
+import { Lato, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const lato = Lato({
+    variable: "--font-body",
     subsets: ["latin"],
+    weight: ["300", "400", "700"],
 });
 
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+    variable: "--font-heading",
     subsets: ["latin"],
+    weight: ["400", "600"],
 });
+
+export const metadata: Metadata = {
+    title: {
+        default: "Mercadona",
+        template: "%s | Mercadona",
+    },
+};
 
 export default function RootLayout({
     children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="es" suppressHydrationWarning>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+                className={`${lato.variable} ${spaceGrotesk.variable} antialiased`}
             >
                 <ThemeProvider
                     attribute="class"
@@ -30,7 +39,10 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     <Header />
-                    <main className="min-h-screen">{children}</main>
+                    <div className="flex min-h-screen flex-col">
+                        <main className="flex-1 pt-20">{children}</main>
+                        <Footer />
+                    </div>
                 </ThemeProvider>
             </body>
         </html>

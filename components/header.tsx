@@ -1,45 +1,126 @@
-import { ShoppingCart } from "lucide-react";
+"use client";
+
+import { Menu, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ui/theme-toggle";
 
+const links = [
+    { href: "/", label: "Inicio" },
+    { href: "/productos", label: "Productos" },
+    { href: "/supermercados", label: "Supermercados" },
+    { href: "/contacto", label: "Contáctanos" },
+];
+
 export function Header() {
+    const [open, setOpen] = useState(false);
+    const pathname = usePathname();
+
     return (
-        <header className="relative flex items-center justify-between h-20 px-8 bg-header w-full">
-            <div className="flex items-center z-10">
-                <Image
-                    src={"/mercadona.svg"}
-                    alt="Logo de Mercadona"
-                    width={250}
-                    height={40}
-                    priority
-                />
+        <header className="fixed top-0 left-0 right-0 flex items-center justify-between h-20 px-6 md:px-8 bg-header w-full shadow-sm z-50">
+            <div className="flex items-center gap-4 z-10">
+                <Link
+                    href="/"
+                    aria-label="Ir al inicio"
+                    className="inline-flex items-center"
+                >
+                    <Image
+                        src={"/mercadona.svg"}
+                        alt={"Logo de Mercadona"}
+                        width={180}
+                        height={40}
+                        priority
+                    />
+                </Link>
             </div>
 
-            <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="flex gap-8 text-lg">
-                    <Link className="text-primary" href={"/"}>
-                        Inicio
-                    </Link>
-                    <Link className="text-primary" href={"/"}>
-                        Productos
-                    </Link>
-                    <Link className="text-primary" href={"/"}>
-                        Supermercados
-                    </Link>
-                    <Link className="text-primary" href={"/"}>
-                        Contáctanos
-                    </Link>
-                </div>
+            <nav aria-label="Main navigation" className="hidden md:block">
+                <ul className="flex gap-8 text-lg">
+                    {links.map((l) => {
+                        const active = pathname === l.href;
+                        return (
+                            <li key={l.href}>
+                                <Link
+                                    href={l.href}
+                                    className={`text-primary transition-colors ${
+                                        active
+                                            ? "font-semibold underline-offset-4 underline"
+                                            : "opacity-90 hover:opacity-100"
+                                    }`}
+                                    aria-current={active ? "page" : undefined}
+                                >
+                                    {l.label}
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
             </nav>
 
-            <div className="flex items-center z-10 gap-4">
-                <Button variant={"ghost"} size={"icon"}>
-                    <ShoppingCart size={32} />
-                </Button>
-                <ThemeToggle />
+            <div className="flex items-center z-10 gap-2">
+                <div className="hidden md:flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Ver carrito"
+                    >
+                        <ShoppingCart size={22} />
+                    </Button>
+                    <ThemeToggle />
+                </div>
+
+                <div className="md:hidden">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={open ? "Cerrar menú" : "Abrir menú"}
+                        onClick={() => setOpen((v) => !v)}
+                    >
+                        {open ? <X size={20} /> : <Menu size={20} />}
+                    </Button>
+                </div>
             </div>
+
+            {open && (
+                <div className="absolute inset-x-4 top-full mt-2 z-20 bg-card/90 backdrop-blur-md rounded-lg p-4 shadow-lg md:hidden">
+                    <ul className="flex flex-col gap-3">
+                        {links.map((l) => {
+                            const active = pathname === l.href;
+                            return (
+                                <li key={l.href}>
+                                    <Link
+                                        href={l.href}
+                                        className={`block py-2 px-3 rounded-md text-primary ${
+                                            active
+                                                ? "bg-muted font-semibold"
+                                                : "hover:bg-muted/70"
+                                        }`}
+                                        onClick={() => setOpen(false)}
+                                        aria-current={
+                                            active ? "page" : undefined
+                                        }
+                                    >
+                                        {l.label}
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                        <li className="pt-2 border-t border-border mt-2 flex items-center justify-between">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Ver carrito"
+                            >
+                                <ShoppingCart size={18} />
+                            </Button>
+                            <ThemeToggle />
+                        </li>
+                    </ul>
+                </div>
+            )}
         </header>
     );
 }

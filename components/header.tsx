@@ -13,6 +13,9 @@ const links = [
     { href: "/productos", label: "Productos" },
     { href: "/supermercados", label: "Supermercados" },
     { href: "/contacto", label: "Contáctanos" },
+    { href: "/test-ollama", label: "Test Ollama" },
+    { href: "/playground-ollama", label: "Playground" },
+    { href: "/ollama-status", label: "Estado" },
 ];
 
 export function Header() {

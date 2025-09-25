@@ -10,9 +10,8 @@ import { ThemeToggle } from "./ui/theme-toggle";
 
 const links = [
     { href: "/", label: "Inicio" },
-    { href: "/productos", label: "Productos" },
-    { href: "/supermercados", label: "Supermercados" },
-    { href: "/contacto", label: "Contáctanos" },
+    { href: "/products", label: "Productos" },
+    { href: "/supermarkets", label: "Supermercados" },
     { href: "/test-ollama", label: "Test Ollama" },
     { href: "/playground-ollama", label: "Playground" },
     { href: "/ollama-status", label: "Estado" },
@@ -112,13 +111,12 @@ export function Header() {
                             );
                         })}
                         <li className="pt-2 border-t border-border mt-2 flex items-center justify-between">
-                            <Button
-                                variant="ghost"
-                                size="icon"
+                            <Link
+                                href="/cart"
                                 aria-label="Ver carrito"
                             >
                                 <ShoppingCart size={18} />
-                            </Button>
+                            </Link>
                             <ThemeToggle />
                         </li>
                     </ul>

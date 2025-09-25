@@ -25,39 +25,39 @@ export default function Footer() {
                 <div className="flex flex-col items-start md:items-end gap-3">
                     <div className="flex items-center gap-4">
                         <a
-                            href="mailto:info@mercadona.example"
+                            href="mailto:atencionalcliente@mercadona.es"
                             className="text-primary hover:underline"
                         >
-                            info@mercadona.example
+                            atencionalcliente@mercadona.es
                         </a>
                         <span className="hidden md:inline text-muted-foreground">
                             ·
                         </span>
                         <a
-                            href="tel:+34123456789"
+                            href="tel:+34800500220"
                             className="text-primary hover:underline"
                         >
-                            +34 123 456 789
+                            +34 800 500 220
                         </a>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Link
-                            href="#"
+                            href="https://www.facebook.com/mercadona/?locale=es_ES"
                             aria-label="Facebook"
                             className="text-muted-foreground hover:text-primary transition-colors"
                         >
                             <Facebook size={18} />
                         </Link>
                         <Link
-                            href="#"
+                            href="https://x.com/Mercadona"
                             aria-label="Twitter"
                             className="text-muted-foreground hover:text-primary transition-colors"
                         >
                             <Twitter size={18} />
                         </Link>
                         <Link
-                            href="#"
+                            href="https://www.instagram.com/mercadona/?hl=en"
                             aria-label="Instagram"
                             className="text-muted-foreground hover:text-primary transition-colors"
                         >
@@ -75,16 +75,16 @@ export default function Footer() {
                     </span>
                     <div className="flex gap-4 mt-2 md:mt-0">
                         <Link
-                            href="/privacidad"
+                            href="https://info.mercadona.es/es/politica-de-privacidad"
                             className="text-muted-foreground hover:underline"
                         >
                             Política de privacidad
                         </Link>
                         <Link
-                            href="/terminos"
+                            href="https://info.mercadona.es/es/terminos-y-condiciones"
                             className="text-muted-foreground hover:underline"
                         >
-                            Términos
+                            Términos y Condiciones
                         </Link>
                     </div>
                 </div>

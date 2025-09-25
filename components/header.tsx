@@ -68,8 +68,11 @@ export function Header() {
                         variant="ghost"
                         size="icon"
                         aria-label="Ver carrito"
+                        asChild
                     >
-                        <ShoppingCart size={22} />
+                        <Link href="/cart">
+                            <ShoppingCart size={22} />
+                        </Link>
                     </Button>
                     <ThemeToggle />
                 </div>
@@ -111,12 +114,15 @@ export function Header() {
                             );
                         })}
                         <li className="pt-2 border-t border-border mt-2 flex items-center justify-between">
-                            <Link
-                                href="/cart"
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 aria-label="Ver carrito"
                             >
-                                <ShoppingCart size={18} />
-                            </Link>
+                                <Link href="/cart">
+                                    <ShoppingCart size={18} />
+                                </Link>
+                            </Button>
                             <ThemeToggle />
                         </li>
                     </ul>

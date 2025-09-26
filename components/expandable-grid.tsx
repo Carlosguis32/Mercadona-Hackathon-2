@@ -39,8 +39,8 @@ function ExpandableButton({ item, isExpanded, onToggle }: ExpandableButtonProps)
     >
       <div className={`
         ${isExpanded 
-          ? 'flex-1 text-left' 
-          : 'text-center'
+          ? 'flex-1 text-left order-2'
+          : 'text-center order-1'
         }
       `}>
         <h3 className={`
@@ -63,10 +63,10 @@ function ExpandableButton({ item, isExpanded, onToggle }: ExpandableButtonProps)
       <div className={`
         relative bg-black 
         ${isExpanded 
-          ? 'w-20 h-20 flex-shrink-0' 
-          : 'w-24 h-24 mb-3'
+          ? 'w-20 h-20 flex-shrink-0 order-1'
+          : 'w-24 h-24 mb-3 order-2'
         }
-        transition-all duration-300 ease-in-out
+        transition-[width,height] duration-300 ease-in-out
       `}>
         <Image
           src={item.imageUrl}

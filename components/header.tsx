@@ -12,6 +12,7 @@ const links = [
     { href: "/", label: "Inicio" },
     { href: "/products", label: "Productos" },
     { href: "/supermarkets", label: "Supermercados" },
+    { href: "/mercadona-sobre-ruedas", label: "Mercadona sobre ruedas" },
     { href: "/test-ollama", label: "Test Ollama" },
     { href: "/playground-ollama", label: "Playground" },
     { href: "/ollama-status", label: "Estado" },

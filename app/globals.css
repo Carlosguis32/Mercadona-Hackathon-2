@@ -43,6 +43,7 @@
     --radius-xl: calc(var(--radius) + 4px);
 
     --color-header: var(--header);
+    --color-mercadona-green: var(--mercadona-green);
 }
 
 :root {
@@ -81,6 +82,7 @@
 
     --header: oklch(1 0 0);
     --text-default: oklch(0 0 0);
+    --mercadona-green: oklch(0.5266 0.1374 150.79);
 }
 
 .dark {
@@ -118,6 +120,7 @@
 
     --header: oklch(0.2 0 0);
     --text-default: oklch(1 0 0);
+    --mercadona-green: oklch(0.5266 0.1374 150.79);
 }
 
 @layer base {

@@ -1,4 +1,7 @@
 import { ExpandableGrid } from "@/components/expandable-grid";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "lucide-react";
+import Link from "next/link";
 
 export default function MercadonaSobreRuedas() {
     const gridItems = [
@@ -52,12 +55,30 @@ export default function MercadonaSobreRuedas() {
                 <h1 className="text-2xl font-semibold mb-4">
                     Bienvenido a Mercadona Meal Plan
                 </h1>
+
                 <p className="text-muted-foreground mb-8">
                     ¡Explora nuestros planes para encontrar el que funciona para
                     tí, o crea el tuyo!
                 </p>
 
                 <ExpandableGrid items={gridItems} />
+
+                <h1 className="text-2xl font-semibold mb-4 mt-16">
+                    ...O si no te convencen nuestros menús, personaliza uno
+                </h1>
+
+                <Button
+                    size="lg"
+                    className="bg-mercadona-green hover:bg-mercadona-green/90 text-lg px-4 w-full"
+                >
+                    <Link
+                        className="flex items-center"
+                        href={"/personalizar-menu"}
+                    >
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Personaliza tu menú
+                    </Link>
+                </Button>
             </section>
         </div>
     );

@@ -27,7 +27,7 @@ function ExpandableButton({ item, isExpanded, onToggle, isExpandedView = false }
   return (
     <Button
       onClick={onToggle}
-      variant={isExpanded && !isExpandedView ? "default" : "outline"}
+      variant="outline"
       className={`
         w-full h-full p-4 
         flex items-center justify-center
@@ -37,7 +37,7 @@ function ExpandableButton({ item, isExpanded, onToggle, isExpandedView = false }
           ? 'flex-row justify-start gap-6 text-left h-32' 
           : 'flex-col aspect-square h-48'
         }
-        ${isExpanded && !isExpandedView ? 'ring-2 ring-primary' : ''}
+        ${isExpanded ? 'border-[var(--mercadona-green)]' : ''}
       `}
     >
       <div className={`
@@ -52,6 +52,7 @@ function ExpandableButton({ item, isExpanded, onToggle, isExpandedView = false }
             ? 'text-xl mb-2' 
             : 'text-lg'
           }
+          ${isExpanded ? 'text-[var(--mercadona-green)]' : ''}
         `}>
           {item.title}
         </h3>

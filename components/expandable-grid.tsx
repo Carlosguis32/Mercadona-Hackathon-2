@@ -14,7 +14,6 @@ interface GridItem {
 interface ExpandableGridProps {
   items: GridItem[]
   columns?: number
-  expandDirection?: 'above' | 'below'
 }
 
 interface ExpandableButtonProps {
@@ -83,7 +82,7 @@ function ExpandableButton({ item, isExpanded, onToggle, isExpandedView = false }
   )
 }
 
-export function ExpandableGrid({ items, columns = 3, expandDirection = 'below' }: ExpandableGridProps) {
+export function ExpandableGrid({ items, columns = 3 }: ExpandableGridProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const handleToggle = (id: string) => {
@@ -109,7 +108,7 @@ export function ExpandableGrid({ items, columns = 3, expandDirection = 'below' }
       const rowItems = getRowItems(index)
       const expandedInRow = rowItems.find(rowItem => rowItem.id === expandedId)
 
-      if (expandedInRow && expandDirection === 'above') {
+      if (expandedInRow) {
         result.push(
           <div key={`expanded-${rowIndex}`} className="md:col-span-3">
             <ExpandableButton
@@ -134,19 +133,6 @@ export function ExpandableGrid({ items, columns = 3, expandDirection = 'below' }
           </div>
         )
       })
-
-      if (expandedInRow && expandDirection === 'below') {
-        result.push(
-          <div key={`expanded-${rowIndex}`} className="md:col-span-3">
-            <ExpandableButton
-              item={expandedInRow}
-              isExpanded={true}
-              onToggle={() => handleToggle(expandedInRow.id)}
-              isExpandedView={true}
-            />
-          </div>
-        )
-      }
 
       processedRows.add(rowIndex)
     })

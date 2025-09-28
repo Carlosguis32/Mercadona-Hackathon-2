@@ -21,33 +21,35 @@ interface ExpandableButtonProps {
   item: GridItem
   isExpanded: boolean
   onToggle: () => void
+  isExpandedView?: boolean
 }
 
-function ExpandableButton({ item, isExpanded, onToggle }: ExpandableButtonProps) {
+function ExpandableButton({ item, isExpanded, onToggle, isExpandedView = false }: ExpandableButtonProps) {
   return (
     <Button
       onClick={onToggle}
-      variant="outline"
+      variant={isExpanded && !isExpandedView ? "default" : "outline"}
       className={`
         w-full h-full p-4 
         flex items-center justify-center
         transition-all duration-300 ease-in-out
         hover:shadow-lg
-        ${isExpanded 
+        ${isExpandedView
           ? 'flex-row justify-start gap-6 text-left h-32' 
           : 'flex-col aspect-square h-48'
         }
+        ${isExpanded && !isExpandedView ? 'ring-2 ring-primary' : ''}
       `}
     >
       <div className={`
-        ${isExpanded 
+        ${isExpandedView
           ? 'flex-1 text-left order-2'
           : 'text-center order-1'
         }
       `}>
         <h3 className={`
           font-semibold 
-          ${isExpanded 
+          ${isExpandedView
             ? 'text-xl mb-2' 
             : 'text-lg'
           }
@@ -55,7 +57,7 @@ function ExpandableButton({ item, isExpanded, onToggle }: ExpandableButtonProps)
           {item.title}
         </h3>
         
-        {isExpanded && item.expandedContent && (
+        {isExpandedView && item.expandedContent && (
           <p className="text-sm text-muted-foreground">
             {item.expandedContent}
           </p>
@@ -64,7 +66,7 @@ function ExpandableButton({ item, isExpanded, onToggle }: ExpandableButtonProps)
       
       <div className={`
         relative bg-black 
-        ${isExpanded 
+        ${isExpandedView
           ? 'w-20 h-20 flex-shrink-0 order-1'
           : 'w-24 h-24 mb-3 order-2'
         }
@@ -107,76 +109,43 @@ export function ExpandableGrid({ items, columns = 3, expandDirection = 'below' }
       const rowItems = getRowItems(index)
       const expandedInRow = rowItems.find(rowItem => rowItem.id === expandedId)
 
-      if (expandedInRow) {
-        const otherItemsInRow = rowItems.filter(rowItem => rowItem.id !== expandedId)
-        
-        if (expandDirection === 'above') {
-          if (otherItemsInRow.length > 0) {
-            result.push(
-              <div key={`above-${rowIndex}`} className="md:col-span-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  {otherItemsInRow.map((rowItem) => (
-                    <ExpandableButton
-                      key={rowItem.id}
-                      item={rowItem}
-                      isExpanded={false}
-                      onToggle={() => handleToggle(rowItem.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          }
+      if (expandedInRow && expandDirection === 'above') {
+        result.push(
+          <div key={`expanded-${rowIndex}`} className="md:col-span-3">
+            <ExpandableButton
+              item={expandedInRow}
+              isExpanded={true}
+              onToggle={() => handleToggle(expandedInRow.id)}
+              isExpandedView={true}
+            />
+          </div>
+        )
+      }
 
-          result.push(
-            <div key={`expanded-${rowIndex}`} className="md:col-span-3">
-              <ExpandableButton
-                item={expandedInRow}
-                isExpanded={true}
-                onToggle={() => handleToggle(expandedInRow.id)}
-              />
-            </div>
-          )
-        } else {
-          result.push(
-            <div key={`expanded-${rowIndex}`} className="md:col-span-3">
-              <ExpandableButton
-                item={expandedInRow}
-                isExpanded={true}
-                onToggle={() => handleToggle(expandedInRow.id)}
-              />
-            </div>
-          )
+      rowItems.forEach((rowItem) => {
+        result.push(
+          <div key={rowItem.id} className="md:col-span-1">
+            <ExpandableButton
+              item={rowItem}
+              isExpanded={rowItem.id === expandedId}
+              onToggle={() => handleToggle(rowItem.id)}
+              isExpandedView={false}
+            />
+          </div>
+        )
+      })
 
-          if (otherItemsInRow.length > 0) {
-            result.push(
-              <div key={`below-${rowIndex}`} className="md:col-span-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  {otherItemsInRow.map((rowItem) => (
-                    <ExpandableButton
-                      key={rowItem.id}
-                      item={rowItem}
-                      isExpanded={false}
-                      onToggle={() => handleToggle(rowItem.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          }
-        }
-      } else {
-        rowItems.forEach((rowItem) => {
-          result.push(
-            <div key={rowItem.id} className="md:col-span-1">
-              <ExpandableButton
-                item={rowItem}
-                isExpanded={false}
-                onToggle={() => handleToggle(rowItem.id)}
-              />
-            </div>
-          )
-        })
+      if (expandedInRow && expandDirection === 'below') {
+        result.push(
+          <div key={`expanded-${rowIndex}`} className="md:col-span-3">
+            <ExpandableButton
+              item={expandedInRow}
+              isExpanded={true}
+              onToggle={() => handleToggle(expandedInRow.id)}
+              isExpandedView={true}
+            />
+          </div>
+        )
       }
 
       processedRows.add(rowIndex)

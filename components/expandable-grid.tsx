@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { JSX, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
@@ -13,6 +13,8 @@ interface GridItem {
 
 interface ExpandableGridProps {
   items: GridItem[]
+  columns?: number
+  expandDirection?: 'above' | 'below'
 }
 
 interface ExpandableButtonProps {
@@ -72,37 +74,120 @@ function ExpandableButton({ item, isExpanded, onToggle }: ExpandableButtonProps)
           src={item.imageUrl}
           alt={item.title}
           fill
-          className="object-cover rounded"
+          className="object-cover rounded transition-none"
         />
       </div>
     </Button>
   )
 }
 
-export function ExpandableGrid({ items }: ExpandableGridProps) {
+export function ExpandableGrid({ items, columns = 3, expandDirection = 'below' }: ExpandableGridProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const handleToggle = (id: string) => {
     setExpandedId(expandedId === id ? null : id)
   }
 
+  const getRowItems = (itemIndex: number) => {
+    const rowIndex = Math.floor(itemIndex / columns)
+    const rowStart = rowIndex * columns
+    const rowEnd = Math.min(rowStart + columns, items.length)
+    return items.slice(rowStart, rowEnd)
+  }
+
+  const renderGrid = () => {
+    const result: JSX.Element[] = []
+    const processedRows = new Set<number>()
+
+    items.forEach((item, index) => {
+      const rowIndex = Math.floor(index / columns)
+      
+      if (processedRows.has(rowIndex)) return
+
+      const rowItems = getRowItems(index)
+      const expandedInRow = rowItems.find(rowItem => rowItem.id === expandedId)
+
+      if (expandedInRow) {
+        const otherItemsInRow = rowItems.filter(rowItem => rowItem.id !== expandedId)
+        
+        if (expandDirection === 'above') {
+          if (otherItemsInRow.length > 0) {
+            result.push(
+              <div key={`above-${rowIndex}`} className="md:col-span-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {otherItemsInRow.map((rowItem) => (
+                    <ExpandableButton
+                      key={rowItem.id}
+                      item={rowItem}
+                      isExpanded={false}
+                      onToggle={() => handleToggle(rowItem.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          }
+
+          result.push(
+            <div key={`expanded-${rowIndex}`} className="md:col-span-3">
+              <ExpandableButton
+                item={expandedInRow}
+                isExpanded={true}
+                onToggle={() => handleToggle(expandedInRow.id)}
+              />
+            </div>
+          )
+        } else {
+          result.push(
+            <div key={`expanded-${rowIndex}`} className="md:col-span-3">
+              <ExpandableButton
+                item={expandedInRow}
+                isExpanded={true}
+                onToggle={() => handleToggle(expandedInRow.id)}
+              />
+            </div>
+          )
+
+          if (otherItemsInRow.length > 0) {
+            result.push(
+              <div key={`below-${rowIndex}`} className="md:col-span-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  {otherItemsInRow.map((rowItem) => (
+                    <ExpandableButton
+                      key={rowItem.id}
+                      item={rowItem}
+                      isExpanded={false}
+                      onToggle={() => handleToggle(rowItem.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          }
+        }
+      } else {
+        rowItems.forEach((rowItem) => {
+          result.push(
+            <div key={rowItem.id} className="md:col-span-1">
+              <ExpandableButton
+                item={rowItem}
+                isExpanded={false}
+                onToggle={() => handleToggle(rowItem.id)}
+              />
+            </div>
+          )
+        })
+      }
+
+      processedRows.add(rowIndex)
+    })
+
+    return result
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-max">
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className={`
-            ${expandedId === item.id ? 'md:col-span-3' : 'md:col-span-1'}
-            transition-all duration-300 ease-in-out
-          `}
-        >
-          <ExpandableButton
-            item={item}
-            isExpanded={expandedId === item.id}
-            onToggle={() => handleToggle(item.id)}
-          />
-        </div>
-      ))}
+      {renderGrid()}
     </div>
   )
 }

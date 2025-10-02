@@ -13,6 +13,7 @@ const links = [
     { href: "/products", label: "Productos" },
     { href: "/supermarkets", label: "Supermercados" },
     { href: "/mercadona-sobre-ruedas", label: "Mercadona sobre ruedas" },
+    { href: "/personalizar-menu", label: "Personaliza tu plan alimenticio" },
     { href: "/test-ollama", label: "Test Ollama" },
 ];
 
@@ -46,11 +47,10 @@ export function Header() {
                             <li key={l.href}>
                                 <Link
                                     href={l.href}
-                                    className={`text-primary transition-colors ${
-                                        active
-                                            ? "font-semibold underline-offset-4 underline"
-                                            : "opacity-90 hover:opacity-100"
-                                    }`}
+                                    className={`text-primary transition-colors ${active
+                                        ? "font-semibold underline-offset-4 underline"
+                                        : "opacity-90 hover:opacity-100"
+                                        }`}
                                     aria-current={active ? "page" : undefined}
                                 >
                                     {l.label}
@@ -97,11 +97,10 @@ export function Header() {
                                 <li key={l.href}>
                                     <Link
                                         href={l.href}
-                                        className={`block py-2 px-3 rounded-md text-primary ${
-                                            active
-                                                ? "bg-muted font-semibold"
-                                                : "hover:bg-muted/70"
-                                        }`}
+                                        className={`block py-2 px-3 rounded-md text-primary ${active
+                                            ? "bg-muted font-semibold"
+                                            : "hover:bg-muted/70"
+                                            }`}
                                         onClick={() => setOpen(false)}
                                         aria-current={
                                             active ? "page" : undefined

@@ -64,7 +64,7 @@ export default function MercadonaSobreRuedas() {
                 <ExpandableGrid items={gridItems} />
 
                 <h1 className="text-2xl font-semibold mb-4 mt-16">
-                    ...O si no te convencen nuestros menús, personaliza uno
+                    ...O si no te convencen nuestros planes alimenticios, personaliza uno
                 </h1>
 
                 <Button
@@ -76,7 +76,7 @@ export default function MercadonaSobreRuedas() {
                         href={"/personalizar-menu"}
                     >
                         <ShoppingCart className="mr-2 h-5 w-5" />
-                        Personaliza tu menú
+                        Personaliza tu plan alimenticio
                     </Link>
                 </Button>
             </section>

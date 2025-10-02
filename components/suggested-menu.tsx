@@ -101,11 +101,11 @@ export function SuggestedMenu({
         const updatedItems = menu.items.map((item) =>
             item.id === itemId
                 ? {
-                      ...item,
-                      product: newProduct,
-                      isOriginalSuggestion: false,
-                      reason: `Cambiado por el usuario`,
-                  }
+                    ...item,
+                    product: newProduct,
+                    isOriginalSuggestion: false,
+                    reason: `Cambiado por el usuario`,
+                }
                 : item
         );
 
@@ -315,7 +315,7 @@ export function SuggestedMenu({
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={onDismiss}>
-                        Descartar menú
+                        Descartar plan alimenticio
                     </Button>
                     <Button
                         onClick={addAllToCart}

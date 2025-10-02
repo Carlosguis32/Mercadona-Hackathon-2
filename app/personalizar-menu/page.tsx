@@ -104,11 +104,11 @@ export default function PersonalizarMenu() {
                 <div className="flex items-center gap-3 mb-4">
                     <ChefHat className="h-8 w-8 text-green-600" />
                     <h1 className="text-3xl font-bold">
-                        Menús Completos Mercadona
+                        Planes Alimenticios Completos Mercadona
                     </h1>
                 </div>
                 <p className="text-muted-foreground text-lg">
-                    Diseña menús completos con platos precocinados, postres y
+                    Diseña planes alimenticios completos con platos precocinados, postres y
                     productos listos de Mercadona. Perfecto para desayunos,
                     almuerzos, comidas y cenas sin complicaciones.
                 </p>
@@ -121,7 +121,7 @@ export default function PersonalizarMenu() {
                 className="space-y-6"
             >
                 <TabsList className="grid grid-cols-2 w-full max-w-md">
-                    <TabsTrigger value="chat">🍽️ Chef de Menús</TabsTrigger>
+                    <TabsTrigger value="chat">🍽️ Chef de plan alimenticio</TabsTrigger>
                     <TabsTrigger value="products">🛒 Productos</TabsTrigger>
                 </TabsList>
 

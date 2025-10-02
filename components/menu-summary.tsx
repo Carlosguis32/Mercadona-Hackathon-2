@@ -31,15 +31,15 @@ export function MenuSummary({
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <ShoppingCart className="h-5 w-5" />
-                        Mi Menú Completo
+                        Mi Plan Alimenticio Completo
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="text-center py-8 text-muted-foreground">
                         <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p>Tu menú está vacío</p>
+                        <p>Tu plan alimenticio está vacío</p>
                         <p className="text-sm">
-                            Pregunta al Chef qué tipo de menú necesitas
+                            Pregunta al Chef qué tipo de plan alimenticio necesitas
                         </p>
                     </div>
                 </CardContent>
@@ -53,7 +53,7 @@ export function MenuSummary({
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                         <ShoppingCart className="h-5 w-5" />
-                        Mi Menú Completo
+                        Mi Plan Alimenticio Completo
                         <Badge variant="secondary" className="ml-2">
                             {totalItems}{" "}
                             {totalItems === 1 ? "producto" : "productos"}

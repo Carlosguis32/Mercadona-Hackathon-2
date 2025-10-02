@@ -336,11 +336,10 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                     {messages.map((message) => (
                         <div
                             key={message.id}
-                            className={`flex gap-3 ${
-                                message.role === "user"
+                            className={`flex gap-3 ${message.role === "user"
                                     ? "justify-end"
                                     : "justify-start"
-                            }`}
+                                }`}
                         >
                             {message.role === "assistant" && (
                                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
@@ -349,11 +348,10 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                             )}
 
                             <div
-                                className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                                    message.role === "user"
+                                className={`max-w-[80%] rounded-lg px-4 py-2 ${message.role === "user"
                                         ? "bg-blue-500 text-white ml-auto"
                                         : "bg-gray-100"
-                                }`}
+                                    }`}
                             >
                                 <p className="text-sm whitespace-pre-wrap">
                                     {message.content}

@@ -3,7 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ChatMessage, MenuSuggestion } from "@/lib/menu-types";
+import {
+    ChatMessage,
+    MenuSuggestion,
+    MercadonaProduct,
+} from "@/lib/menu-types";
 import { searchProducts } from "@/lib/mercadona-products";
 import { OllamaChatMessage, OllamaChatRequest } from "@/lib/ollama-types";
 import { Bot, Loader2, Send, User } from "lucide-react";
@@ -16,21 +20,16 @@ import {
 
 interface MenuChatProps {
     currentMenu: Record<string, number>;
-    menuContext: string;
     onApplySuggestion: (suggestion: MenuSuggestion) => void;
 }
 
-export function MenuChat({
-    currentMenu,
-    menuContext,
-    onApplySuggestion,
-}: MenuChatProps) {
+export function MenuChat({ onApplySuggestion }: MenuChatProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             id: "1",
             role: "assistant",
             content:
-                "¡Hola! Soy tu asistente de menús completos de Mercadona 🍽️. Te ayudo a crear menús equilibrados con platos precocinados, postres y productos listos para consumir.\n\nDime qué tipo de comida necesitas (desayuno, almuerzo, comida, cena) o qué ocasión tienes en mente, ¡y te sugiero un menú completo!",
+                "¡Hola! Te ayudo a crear menús de Mercadona 🍽️\n\nEscribe qué tipo de menú necesitas:\n• Desayuno saludable\n• Comida rápida\n• Cena familiar\n• Merienda\n\nTe responderé con productos específicos de Mercadona en este formato exacto:\n\n🍽️ Plato Principal: [producto]\n🥗 Acompañamiento: [producto]\n🍰 Postre: [producto]\n🥤 Bebida: [producto]",
             timestamp: new Date(),
         },
     ]);
@@ -50,39 +49,127 @@ export function MenuChat({
         scrollToBottom();
     }, [messages]);
 
+    // Función para validar si el formato del menú es correcto
+    const isValidMenuFormat = (content: string): boolean => {
+        const requiredEmojis = ["🍽️", "🥗", "🍰", "🥤"];
+        const hasAllEmojis = requiredEmojis.every((emoji) =>
+            content.includes(emoji)
+        );
+
+        // Verificar que tenga exactamente 4 líneas con emojis
+        const lines = content
+            .split("\n")
+            .filter((line) => line.trim().length > 0);
+        const emojiLines = lines.filter((line) =>
+            requiredEmojis.some((emoji) => line.includes(emoji))
+        );
+
+        return hasAllEmojis && emojiLines.length >= 4;
+    };
+
+    // Función para intentar corregir el formato de la respuesta
+    const attemptFormatCorrection = (content: string): string => {
+        const allProducts = searchProducts("");
+        const correctedLines: string[] = [];
+
+        // Buscar productos mencionados y organizarlos por categoría
+        const foundProducts = {
+            main: allProducts.filter(
+                (p) =>
+                    (p.category === "main-dishes" ||
+                        p.category === "ready-meals") &&
+                    content.toLowerCase().includes(p.name.toLowerCase())
+            ),
+            sides: allProducts.filter(
+                (p) =>
+                    p.category === "sides" &&
+                    content.toLowerCase().includes(p.name.toLowerCase())
+            ),
+            desserts: allProducts.filter(
+                (p) =>
+                    p.category === "desserts" &&
+                    content.toLowerCase().includes(p.name.toLowerCase())
+            ),
+            beverages: allProducts.filter(
+                (p) =>
+                    p.category === "beverages" &&
+                    content.toLowerCase().includes(p.name.toLowerCase())
+            ),
+            breakfast: allProducts.filter(
+                (p) =>
+                    p.category === "breakfast" &&
+                    content.toLowerCase().includes(p.name.toLowerCase())
+            ),
+        };
+
+        // Construir formato correcto
+        const mainProduct = foundProducts.main[0] || foundProducts.breakfast[0];
+        const sideProduct =
+            foundProducts.sides[0] || foundProducts.breakfast[1];
+        const dessertProduct =
+            foundProducts.desserts[0] || foundProducts.breakfast[2];
+        const beverageProduct = foundProducts.beverages[0];
+
+        if (mainProduct || sideProduct || dessertProduct || beverageProduct) {
+            correctedLines.push(
+                `🍽️ Plato Principal: ${mainProduct?.name || "No disponible"}`
+            );
+            correctedLines.push(
+                `🥗 Acompañamiento: ${sideProduct?.name || "No disponible"}`
+            );
+            correctedLines.push(
+                `🍰 Postre: ${dessertProduct?.name || "No disponible"}`
+            );
+            correctedLines.push(
+                `🥤 Bebida: ${beverageProduct?.name || "Agua Mineral Natural"}`
+            );
+
+            return correctedLines.join("\n");
+        }
+
+        return content; // Si no podemos corregir, devolver original
+    };
+
     const buildSystemPrompt = () => {
-        const menuItems = Object.entries(currentMenu)
-            .filter(([, quantity]) => quantity > 0)
-            .map(([productId, quantity]) => `${productId}: ${quantity}`)
-            .join(", ");
+        // Obtener todos los productos del catálogo organizados por categoría
+        const allProducts = searchProducts(""); // Esto devuelve todos los productos
 
-        return `Eres un experto en menús completos de Mercadona. Tu trabajo es ayudar a los usuarios a crear menús equilibrados usando platos precocinados, postres y productos listos de Mercadona.
+        const productsByCategory = {
+            "main-dishes": allProducts.filter(
+                (p) => p.category === "main-dishes"
+            ),
+            sides: allProducts.filter((p) => p.category === "sides"),
+            desserts: allProducts.filter((p) => p.category === "desserts"),
+            beverages: allProducts.filter((p) => p.category === "beverages"),
+            breakfast: allProducts.filter((p) => p.category === "breakfast"),
+            snacks: allProducts.filter((p) => p.category === "snacks"),
+            "ready-meals": allProducts.filter(
+                (p) => p.category === "ready-meals"
+            ),
+        };
 
-Productos actualmente seleccionados: ${menuItems || "Ninguno seleccionado"}
+        const formatProductList = (products: MercadonaProduct[]) =>
+            products.map((p) => `- ${p.name}`).join("\n");
 
-Productos disponibles en Mercadona: ${menuContext}
+        return `Tu única tarea es responder con EXACTAMENTE 4 líneas usando SOLO estos productos de Mercadona:
 
-Instrucciones:
-1. Ayuda a crear menús completos para diferentes ocasiones (desayuno, almuerzo, comida, cena)
-2. Sugiere combinaciones equilibradas de platos principales + acompañamientos + postres + bebidas
-3. Considera aspectos nutricionales y variedad de sabores
-4. Adapta las sugerencias según preferencias (vegano, sin gluten, etc.)
-5. Incluye productos listos para consumir y platos precocinados de Mercadona
-6. Propón menús para diferentes ocasiones (familiar, romántica, rápida, saludable)
+PRODUCTOS DISPONIBLES:
+${formatProductList(productsByCategory["main-dishes"])}
+${formatProductList(productsByCategory["ready-meals"])}
+${formatProductList(productsByCategory["sides"])}
+${formatProductList(productsByCategory["desserts"])}
+${formatProductList(productsByCategory["beverages"])}
+${formatProductList(productsByCategory["breakfast"])}
+${formatProductList(productsByCategory["snacks"])}
 
-Cuando el usuario mencione una ocasión o tipo de comida, responde con:
-"Para [OCASIÓN/COMIDA] te sugiero este menú de Mercadona:
+RESPONDE ÚNICAMENTE CON ESTAS 4 LÍNEAS (sin texto adicional):
 
-🍽️ **Plato Principal**: [producto exacto de Mercadona]
-🥗 **Acompañamiento**: [producto exacto de Mercadona] 
-🍰 **Postre**: [producto exacto de Mercadona]
-🥤 **Bebida**: [producto exacto de Mercadona]
+🍽️ Plato Principal: [producto exacto de la lista]
+🥗 Acompañamiento: [producto exacto de la lista]  
+🍰 Postre: [producto exacto de la lista]
+🥤 Bebida: [producto exacto de la lista]
 
-Los productos se añadirán automáticamente a tu lista de compras."
-
-IMPORTANTE: Usa los nombres EXACTOS de productos disponibles en Mercadona para que se puedan añadir automáticamente. Por ejemplo: "Paella Valenciana Hacendado", "Tiramisú Hacendado", "Zumo de Naranja Natural", etc.
-
-Mantén un tono amigable y profesional en español, enfocándote en la comodidad de tener comidas completas listas.`;
+NO añadas explicaciones. NO uses otros formatos. COPIA los nombres exactos.`;
     };
 
     const sendMessage = async () => {
@@ -100,12 +187,35 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
         setIsLoading(true);
 
         try {
+            // Añadir ejemplos de formato correcto al historial para entrenar el modelo
+            const trainingExamples: OllamaChatMessage[] = [
+                {
+                    role: "user",
+                    content: "menú saludable",
+                },
+                {
+                    role: "assistant",
+                    content:
+                        "🍽️ Plato Principal: Salmón a la Plancha con Verduras\n🥗 Acompañamiento: Ensalada Mixta Preparada\n🍰 Postre: Yogur Griego Natural\n🥤 Bebida: Agua Mineral Natural",
+                },
+                {
+                    role: "user",
+                    content: "desayuno",
+                },
+                {
+                    role: "assistant",
+                    content:
+                        "🍽️ Plato Principal: Tostadas Integrales\n🥗 Acompañamiento: Mermelada de Fresa Hacendado\n🍰 Postre: Plátanos de Canarias\n🥤 Bebida: Zumo de Naranja Natural",
+                },
+            ];
+
             const chatMessages: OllamaChatMessage[] = [
                 {
                     role: "system",
                     content: buildSystemPrompt(),
                 },
-                ...messages.slice(-10).map((msg) => ({
+                ...trainingExamples,
+                ...messages.slice(-6).map((msg) => ({
                     role:
                         msg.role === "user"
                             ? ("user" as const)
@@ -123,8 +233,10 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                 messages: chatMessages,
                 stream: false,
                 options: {
-                    temperature: 0.7,
-                    top_p: 0.9,
+                    temperature: 0.1,
+                    top_p: 0.3,
+                    num_predict: 150,
+                    stop: ["\n\n", "Ejemplo", "EJEMPLO", "---"],
                 },
             };
 
@@ -156,17 +268,28 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                 throw new Error("Respuesta inválida de Ollama");
             }
 
+            // Post-procesar la respuesta para corregir formatos incorrectos
+            let processedContent = data.message.content;
+
+            // Si la respuesta no tiene el formato correcto, intentar corregirla
+            if (!isValidMenuFormat(processedContent)) {
+                console.log(
+                    "Formato incorrecto detectado, intentando corregir..."
+                );
+                processedContent = attemptFormatCorrection(processedContent);
+            }
+
             const assistantMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 role: "assistant",
-                content: data.message.content,
+                content: processedContent,
                 timestamp: new Date(),
             };
 
             setMessages((prev) => [...prev, assistantMessage]);
 
             // Crear menú editable si detectamos sugerencias estructuradas
-            createEditableMenu(data.message.content, assistantMessage.id);
+            createEditableMenu(processedContent, assistantMessage.id);
         } catch (error) {
             console.error("Error sending message:", error);
             const errorMessage: ChatMessage = {
@@ -183,64 +306,185 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
     };
 
     const createEditableMenu = (content: string, messageId: string) => {
-        // Detectar si es un menú estructurado
-        if (
-            !content.includes("🍽️") &&
-            !content.includes("🥗") &&
-            !content.includes("🍰") &&
-            !content.includes("🥤")
-        ) {
-            return; // No es un menú estructurado
-        }
-
         const menuItems: SuggestedMenuItem[] = [];
+        const allProducts = searchProducts(""); // Obtener todos los productos
 
-        // Patrones para detectar productos mencionados con sus categorías
+        // Función para encontrar producto exacto por nombre
+        const findExactProduct = (
+            productName: string
+        ): MercadonaProduct | null => {
+            const cleanName = productName
+                .trim()
+                .replace(/\*+/g, "")
+                .replace(/[:.!?]/g, "")
+                .replace(/^-\s*/, "") // Quitar guiones al inicio
+                .replace(/^\s*[\*\-]\s*/, "") // Quitar asteriscos y guiones con espacios
+                .trim();
+
+            console.log(`Buscando producto: "${cleanName}"`);
+
+            // Buscar coincidencia exacta primero
+            let product = allProducts.find((p) => p.name === cleanName);
+            if (product) {
+                console.log(`Encontrado exacto: ${product.name}`);
+                return product;
+            }
+
+            // Buscar coincidencia parcial más estricta
+            product = allProducts.find(
+                (p) => p.name.toLowerCase() === cleanName.toLowerCase()
+            );
+            if (product) {
+                console.log(`Encontrado por case insensitive: ${product.name}`);
+                return product;
+            }
+
+            // Buscar por palabras clave importantes
+            const searchWords = cleanName.toLowerCase().split(" ");
+            product = allProducts.find((p) => {
+                const productWords = p.name.toLowerCase().split(" ");
+                // Debe coincidir al menos 60% de las palabras importantes
+                const matches = searchWords.filter(
+                    (word) =>
+                        word.length > 3 && // Solo palabras importantes
+                        productWords.some(
+                            (pWord) =>
+                                pWord.includes(word) || word.includes(pWord)
+                        )
+                );
+                return matches.length >= Math.ceil(searchWords.length * 0.6);
+            });
+
+            if (product) {
+                console.log(
+                    `Encontrado por palabras clave: ${product.name} para "${cleanName}"`
+                );
+            } else {
+                console.warn(`NO encontrado: "${cleanName}"`);
+            }
+
+            return product || null;
+        };
+
+        // Patrones mejorados para detectar productos en diferentes formatos
         const patterns = [
+            // Formato correcto con emoji de plato principal
             {
-                regex: /🍽️.*?(?:Principal|Plato).*?:\s*\*?\*?([^\n🥗🍰🥤*]+)\*?\*?/gi,
+                regex: /🍽️.*?(?:Principal|Plato).*?:\s*([^\n🥗🍰🥤]+?)(?:\n|$)/gi,
                 category: "main-dishes" as const,
             },
+            // Formato correcto con emoji de acompañamiento
             {
-                regex: /🥗.*?(?:Acompañamiento|Guarnición).*?:\s*\*?\*?([^\n🍽️🍰🥤*]+)\*?\*?/gi,
+                regex: /🥗.*?(?:Acompañamiento|Guarnición).*?:\s*([^\n🍽️🍰🥤]+?)(?:\n|$)/gi,
                 category: "sides" as const,
             },
+            // Formato correcto con emoji de postre
             {
-                regex: /🍰.*?(?:Postre|Dulce).*?:\s*\*?\*?([^\n🍽️🥗🥤*]+)\*?\*?/gi,
+                regex: /🍰.*?(?:Postre|Dulce).*?:\s*([^\n🍽️🥗🥤]+?)(?:\n|$)/gi,
                 category: "desserts" as const,
             },
+            // Formato correcto con emoji de bebida
             {
-                regex: /🥤.*?(?:Bebida|Líquido).*?:\s*\*?\*?([^\n🍽️🥗🍰*]+)\*?\*?/gi,
+                regex: /🥤.*?(?:Bebida|Líquido).*?:\s*([^\n🍽️🥗🍰]+?)(?:\n|$)/gi,
                 category: "beverages" as const,
             },
+            // Patrones adicionales para formato incorrecto pero detectable
+            // Desayuno con emoji de plato principal
+            {
+                regex: /🍽️.*?(?:Desayuno).*?:\s*([^\n🥗🍰🥤]+?)(?:\n|$)/gi,
+                category: "breakfast" as const,
+            },
+            // Comida con emoji de plato principal
+            {
+                regex: /🍽️.*?(?:Comida|Almuerzo).*?:\s*([^\n🥗🍰🥤]+?)(?:\n|$)/gi,
+                category: "main-dishes" as const,
+            },
         ];
+
+        let foundAnyMatch = false;
 
         patterns.forEach(({ regex, category }) => {
             let match;
             while ((match = regex.exec(content)) !== null) {
                 if (match[1]) {
-                    const cleanName = match[1]
-                        .trim()
-                        .replace(/\*+/g, "") // Quitar asteriscos
-                        .replace(/[:.!?]/g, "") // Quitar puntuación
-                        .trim();
+                    foundAnyMatch = true;
+                    const rawText = match[1].trim();
+                    console.log(`Patrón ${category} encontró: "${rawText}"`);
 
-                    // Buscar producto en el catálogo
-                    const matchingProducts = searchProducts(cleanName);
-                    if (matchingProducts.length > 0) {
-                        const product = matchingProducts[0];
-                        menuItems.push({
-                            id: `${messageId}-${category}-${Date.now()}`,
-                            product,
-                            category,
-                            quantity: 1,
-                            reason: `Sugerido por IA: "${cleanName}"`,
-                            isOriginalSuggestion: true,
-                        });
-                    }
+                    // Si el texto contiene listas con asteriscos o guiones, separar elementos
+                    const items =
+                        rawText.includes("*") || rawText.includes("-")
+                            ? rawText
+                                  .split(/[\*\-]/)
+                                  .filter((item) => item.trim().length > 0)
+                            : [rawText];
+
+                    items.forEach((item) => {
+                        const product = findExactProduct(item);
+
+                        if (product) {
+                            // Verificar que la categoría coincida o sea compatible
+                            const compatibleCategories = {
+                                "main-dishes": ["main-dishes", "ready-meals"],
+                                sides: ["sides", "breakfast"],
+                                desserts: ["desserts", "breakfast"],
+                                beverages: ["beverages"],
+                                breakfast: ["breakfast", "desserts", "sides"],
+                            };
+
+                            if (
+                                compatibleCategories[category]?.includes(
+                                    product.category
+                                ) ||
+                                product.category === category
+                            ) {
+                                menuItems.push({
+                                    id: `${messageId}-${category}-${Date.now()}-${Math.random()}`,
+                                    product,
+                                    category,
+                                    quantity: 1,
+                                    reason: `Sugerido por IA: "${item.trim()}"`,
+                                    isOriginalSuggestion: true,
+                                });
+                                console.log(
+                                    `✅ Añadido: ${product.name} (${category})`
+                                );
+                            } else {
+                                console.warn(
+                                    `❌ Categoría incompatible: ${product.name} es ${product.category}, esperaba ${category}`
+                                );
+                            }
+                        }
+                    });
                 }
             }
         });
+
+        // Si no encontramos nada con los patrones principales, intentar buscar productos mencionados en el texto
+        if (!foundAnyMatch) {
+            console.log(
+                "No se encontraron patrones, buscando productos mencionados en el texto..."
+            );
+            allProducts.forEach((product) => {
+                if (
+                    content.toLowerCase().includes(product.name.toLowerCase())
+                ) {
+                    console.log(
+                        `Producto encontrado en texto: ${product.name}`
+                    );
+                    menuItems.push({
+                        id: `${messageId}-${
+                            product.category
+                        }-${Date.now()}-${Math.random()}`,
+                        product,
+                        category: product.category,
+                        quantity: 1,
+                        reason: `Detectado en texto: "${product.name}"`,
+                        isOriginalSuggestion: true,
+                    });
+                }
+            });
+        }
 
         // Si encontramos productos, crear el menú
         if (menuItems.length > 0) {
@@ -255,6 +499,11 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
             };
 
             setSuggestedMenus((prev) => [...prev, newMenu]);
+            console.log(`✅ Menú creado con ${menuItems.length} productos`);
+        } else {
+            console.warn(
+                "No se encontraron productos válidos en la respuesta de la IA"
+            );
         }
     };
 
@@ -336,10 +585,11 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                     {messages.map((message) => (
                         <div
                             key={message.id}
-                            className={`flex gap-3 ${message.role === "user"
+                            className={`flex gap-3 ${
+                                message.role === "user"
                                     ? "justify-end"
                                     : "justify-start"
-                                }`}
+                            }`}
                         >
                             {message.role === "assistant" && (
                                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
@@ -348,10 +598,11 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                             )}
 
                             <div
-                                className={`max-w-[80%] rounded-lg px-4 py-2 ${message.role === "user"
+                                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                                    message.role === "user"
                                         ? "bg-blue-500 text-white ml-auto"
                                         : "bg-gray-100"
-                                    }`}
+                                }`}
                             >
                                 <p className="text-sm whitespace-pre-wrap">
                                     {message.content}
@@ -427,7 +678,7 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="¿Qué menú necesitas? (ej: desayuno saludable, cena rápida, comida familiar...)"
+                        placeholder="Ej: desayuno, cena familiar, comida rápida..."
                         disabled={isLoading}
                         className="flex-1"
                     />

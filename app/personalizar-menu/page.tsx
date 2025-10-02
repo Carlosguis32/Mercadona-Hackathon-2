@@ -91,13 +91,6 @@ export default function PersonalizarMenu() {
         }
     };
 
-    const menuContext = useMemo(() => {
-        return MERCADONA_PRODUCTS.map(
-            (product) =>
-                `${product.name} (${product.category}) - ${product.price}€`
-        ).join(", ");
-    }, []);
-
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
@@ -108,9 +101,10 @@ export default function PersonalizarMenu() {
                     </h1>
                 </div>
                 <p className="text-muted-foreground text-lg">
-                    Diseña planes alimenticios completos con platos precocinados, postres y
-                    productos listos de Mercadona. Perfecto para desayunos,
-                    almuerzos, comidas y cenas sin complicaciones.
+                    Diseña planes alimenticios completos con platos
+                    precocinados, postres y productos listos de Mercadona.
+                    Perfecto para desayunos, almuerzos, comidas y cenas sin
+                    complicaciones.
                 </p>
             </div>
 
@@ -121,7 +115,9 @@ export default function PersonalizarMenu() {
                 className="space-y-6"
             >
                 <TabsList className="grid grid-cols-2 w-full max-w-md">
-                    <TabsTrigger value="chat">🍽️ Chef de plan alimenticio</TabsTrigger>
+                    <TabsTrigger value="chat">
+                        🍽️ Chef de plan alimenticio
+                    </TabsTrigger>
                     <TabsTrigger value="products">🛒 Productos</TabsTrigger>
                 </TabsList>
 
@@ -240,7 +236,6 @@ export default function PersonalizarMenu() {
                         <TabsContent value="chat" className="mt-0">
                             <MenuChat
                                 currentMenu={menu}
-                                menuContext={menuContext}
                                 onApplySuggestion={handleApplySuggestion}
                             />
                         </TabsContent>

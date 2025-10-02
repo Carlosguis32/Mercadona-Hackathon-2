@@ -119,7 +119,7 @@ Mantén un tono amigable y profesional en español, enfocándote en la comodidad
             ];
 
             const requestBody: OllamaChatRequest = {
-                model: "gemma3:4b",
+                model: "gemma3:1b",
                 messages: chatMessages,
                 stream: false,
                 options: {
